@@ -1,11 +1,22 @@
 class Square
 {
   int x, y;
+  int side;
+  color hue;
   
-  Square(int x, int y)
+  void draw()
+  {
+    noStroke();
+    fill(hue);
+    rect(x, y, side, side);
+  }
+  
+  Square(int x, int y, int side)
   {
     this.x = x;
     this.y = y;
+    this.side = side;
+    hue = color(random(70, 250));
   }
 }
 
@@ -29,10 +40,25 @@ void setup()
   stencil.textAlign(CENTER);
   stencil.text("Pixel Catalyst", width / 2.0 / pixelSize, height / 1.8 / pixelSize);
   stencil.endDraw();
+  
+  stencil.loadPixels();
+  for (int x = 0; x < stencil.width; ++x)
+  {
+    for (int y = 0; y < stencil.height; ++y)
+    {
+      int i = (y * stencil.width) + x;
+      if (stencil.pixels[i] == color(255))
+        LogoSquares.add(new Square(x * pixelSize, y * pixelSize, pixelSize));
+    }
+  }
+  stencil.updatePixels();
 }
 
 void draw() 
 {
   background(0);
-  image(stencil, 0, 0);
+  
+  for (Square sq : LogoSquares)
+    sq.draw();
+    stencil.loadPixels();
 }
