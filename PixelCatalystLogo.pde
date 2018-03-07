@@ -22,13 +22,13 @@ class Square
 
 PGraphics stencil;
 int pixelSize = 3;
-ArrayList<Square> LogoSquares;
+ArrayList<Square> logoSquares;
 
 void setup() 
 {
   size(750, 360);
   noSmooth();
-  LogoSquares = new ArrayList<Square>();
+  logoSquares = new ArrayList<Square>();
   
   stencil = createGraphics(width / pixelSize, height / pixelSize);
   stencil.noSmooth();
@@ -48,7 +48,7 @@ void setup()
     {
       int i = (y * stencil.width) + x;
       if (stencil.pixels[i] == color(255))
-        LogoSquares.add(new Square(x * pixelSize, y * pixelSize, pixelSize));
+        logoSquares.add(new Square(x * pixelSize, y * pixelSize, pixelSize));
     }
   }
   stencil.updatePixels();
@@ -58,7 +58,6 @@ void draw()
 {
   background(0);
   
-  for (Square sq : LogoSquares)
+  for (Square sq : logoSquares)
     sq.draw();
-    stencil.loadPixels();
 }
