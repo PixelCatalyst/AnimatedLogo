@@ -1,6 +1,7 @@
 PGraphics stencil;
 int pixelSize = 3;
 ArrayList<Square> logoSquares;  
+boolean recordFrames = false;
 
 void setup() 
 {
@@ -8,7 +9,7 @@ void setup()
   noSmooth();
   stencil = createGraphics(width / pixelSize, height / pixelSize);
   stencil.noSmooth();
-  
+
   stencil.beginDraw();
   stencil.background(0);
   Logo logo = new Logo(96, 12);
@@ -35,24 +36,51 @@ void setup()
     }
   }
   stencil.updatePixels();
+  noLoop();
 }
 
+boolean started = false;
 boolean isLooping = true;
 
 void mousePressed()
 {
-  if (mouseButton == LEFT)
+  if (started)
   {
-    if (isLooping)
+    if (mouseButton == LEFT)
     {
-      noLoop();
-      isLooping = false;
-    } else
-      redraw();
-  } else if (mouseButton == RIGHT)
+      if (isLooping)
+      {
+        noLoop();
+        isLooping = false;
+      } else
+        redraw();
+    } else if (mouseButton == RIGHT)
+    {
+      loop();
+      isLooping = true;
+    }
+  }
+}
+
+void keyPressed()
+{
+  if (started == false)
   {
+    if ((key == 'r') || (key == 'R'))
+      recordFrames = true;
+    started = true;
     loop();
-    isLooping = true;
+  }
+  else if ((key == 's') || (key == 'S'))
+  {
+    String date = new String();
+    date += nf(year());
+    date += nf(month(), 2);
+    date += nf(day(), 2);
+    date += nf(hour(), 2);
+    date += nf(minute(), 2);
+    date += nf(second(), 2);
+    save("snapshots/snap_" + date + "_" + nf(millis()) + ".png");
   }
 }
 
@@ -61,12 +89,14 @@ void draw()
   background(0);
 
   int pixelsToActivate = 60 / pixelSize;
+  boolean animationFinished = true;
   for (Square sq : logoSquares)
   {
     if (sq.inMotion)
     {
       sq.behaviors();
       sq.update();
+      animationFinished = false;
     }
 
     if (sq.visible)
@@ -77,5 +107,14 @@ void draw()
       sq.inMotion = true;
       --pixelsToActivate;
     }
+  }
+  if (animationFinished)
+    noLoop();
+  
+  if (recordFrames)
+  {
+    saveFrame("frames/frame_####.png");
+    if (animationFinished)
+      recordFrames = false;
   }
 }
