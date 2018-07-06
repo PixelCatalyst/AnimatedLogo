@@ -1,4 +1,4 @@
-[Generated Logo](example_img.png)
+![Generated Logo](example_img.png)
 # Pixels!
 This is the project for PixelCatalyst animated logo in Processing.
 
