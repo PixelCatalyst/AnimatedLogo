@@ -8,14 +8,14 @@ class Square
   float maxSpeed;
   float minRadius;
   int side;
-  color hue;
+  color col;
   boolean visible;
   boolean inMotion;
 
   void draw()
   {
     noStroke();
-    fill(hue);
+    fill(col);
     rect(presentation.x, presentation.y, side, side);
   }
 
@@ -62,7 +62,7 @@ class Square
     applyForce(arriveForce);
   }
 
-  Square(int x, int y, int side, int shatterRadius, float maxSpeed)
+  Square(int x, int y, int side, int shatterRadius, float maxSpeed, color col)
   {
     target = new PVector(x, y);
     float dX = random(x - shatterRadius, x + shatterRadius);
@@ -76,7 +76,7 @@ class Square
 
     this.maxSpeed = maxSpeed;
     this.side = side;
-    hue = color(random(80, 250));
+    this.col = col;
     visible = false;
     inMotion = false;
   }
@@ -104,15 +104,19 @@ class Logo
     float horizontal = (stencil.width - totalWidth) / 2.0;
 
     stencil.textFont(upperCase);
+    stencil.fill(0, 0, 255);
     stencil.text('P', horizontal, vertical + correction);
     horizontal += firstCapitalWidth;
     stencil.textFont(lowerCase);
+    stencil.fill(255);
     stencil.text("ixel ", horizontal, vertical);
     horizontal += firstWordWidth;
     stencil.textFont(upperCase);
+    stencil.fill(255, 0, 0);
     stencil.text('C', horizontal, vertical + correction);
     horizontal += secondCapitalWidth;
     stencil.textFont(lowerCase);
+    stencil.fill(255);
     stencil.text("atalyst", horizontal, vertical);
   }
 
@@ -120,6 +124,54 @@ class Logo
   {
     lowerCase = createFont("Square.ttf", baseFontSize / pixelSize);
     upperCase = createFont("Square.ttf", (baseFontSize + capitalization) / pixelSize);
+  }
+}
+
+class ColorScatter
+{
+  color value;
+
+  color toPredefinedVariation(color input)
+  {
+    color variation = color(0);
+    float r = red(input);
+    float g = green(input);
+    float b = blue(input);
+    if ((r == 0.0) && (g == 0.0) && (b == 255.0))
+      variation = color(0, random(100, 186), 255);
+    else if ((r == 255.0) && (g == 0.0) && (b == 0.0))
+      variation = color(255, 9, random(8, 70));
+    return variation;
+  }
+
+  ColorScatter(color input)
+  {
+    value = toPredefinedVariation(input);
+    float probability = random(10);
+    if (value == color(0))
+    {
+      if (probability < 6.5)
+        value = color(random(190, 255));
+      else
+        value = color(random(90, 195));
+    } else 
+    {
+      float h = hue(value);
+      float s = 0.0;
+      float b = brightness(value);
+      if (probability < 6.0)
+      {
+        s = random(16, 220);
+        b -= random(10);
+      } else
+      {
+        s = random(210, 250);
+        b -= random(128);
+      }
+      colorMode(HSB, 255);
+      value = color(h, s, b);
+      colorMode(RGB, 255);
+    }
   }
 }
 
@@ -131,8 +183,6 @@ void setup()
 {
   size(800, 400);
   noSmooth();
-  logoSquares = new ArrayList<Square>();
-
   stencil = createGraphics(width / pixelSize, height / pixelSize);
   stencil.noSmooth();
   stencil.beginDraw();
@@ -144,18 +194,20 @@ void setup()
   stencil.endDraw();
 
   stencil.loadPixels();
+  logoSquares = new ArrayList<Square>();
   for (int x = 0; x < stencil.width; ++x)
   {
     for (int y = 0; y < stencil.height; ++y)
     {
       int i = (y * stencil.width) + x;
-      if (stencil.pixels[i] == color(255))
+      if (stencil.pixels[i] != color(0))
       {
         int scaledX = x * pixelSize;
         int scaledY = y * pixelSize;
         int shatterRadius = int(random(100, 500));
         float maxSpeed = random(4, 6);
-        Square sq = new Square(scaledX, scaledY, pixelSize, shatterRadius, maxSpeed);
+        ColorScatter scatter = new ColorScatter(stencil.pixels[i]);
+        Square sq = new Square(scaledX, scaledY, pixelSize, shatterRadius, maxSpeed, scatter.value);
         logoSquares.add(sq);
       }
     }
